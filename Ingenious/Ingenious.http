@@ -1,0 +1,6 @@
+@Ingenious_HostAddress = http://localhost:5187
+
+GET {{Ingenious_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
