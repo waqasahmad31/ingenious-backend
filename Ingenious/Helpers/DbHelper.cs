@@ -226,20 +226,33 @@ namespace DAS.DataAccess.Helpers
 
                 foreach (DataColumn column in row.Table.Columns)
                 {
-                    PropertyInfo? property = typeof(T).GetProperty(column.ColumnName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                    // Find the property on T that matches column name (case-insensitive)
+                    PropertyInfo? property = typeof(T).GetProperty(
+                        column.ColumnName,
+                        BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
+                    );
 
                     if (property != null && row[column] != DBNull.Value)
                     {
                         Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-                        //if (propertyType == typeof(TimeSpan))
-                        //{
-                            //property.SetValue(item, TimeSpan.Parse(row[column].ToString()));
-                        //}
-                        //else
-                        //{
+
+                        // 1) If it's an enum, parse the string
+                        if (propertyType.IsEnum)
+                        {
+                            // e.g. "Pending" => OrderStatusEnum.Pending
+                            var stringValue = row[column].ToString();
+                            if (!string.IsNullOrEmpty(stringValue))
+                            {
+                                var enumValue = Enum.Parse(propertyType, stringValue);
+                                property.SetValue(item, enumValue, null);
+                            }
+                        }
+                        else
+                        {
+                            // 2) Otherwise do the normal Convert.ChangeType
                             object? safeValue = Convert.ChangeType(row[column], propertyType);
                             property.SetValue(item, safeValue, null);
-                        //}
+                        }
                     }
                 }
 
@@ -247,8 +260,12 @@ namespace DAS.DataAccess.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error creating item of type '{typeof(T).Name}' from DataRow. Details: {ex.Message}", ex);
+                throw new Exception(
+                    $"Error creating item of type '{typeof(T).Name}' from DataRow. Details: {ex.Message}",
+                    ex
+                );
             }
         }
+
     }
 }

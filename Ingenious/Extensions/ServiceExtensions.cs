@@ -18,6 +18,7 @@ namespace Ingenious.Extensions
             services.AddScoped<IProductImageRepository, ProductImageRepository>();
             services.AddScoped<IProductVariationRepository, ProductVariationRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
         }
     }
 }
