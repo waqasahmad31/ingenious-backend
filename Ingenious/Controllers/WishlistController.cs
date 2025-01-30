@@ -31,6 +31,24 @@ namespace Ingenious.Controllers
             }
         }
 
+        [HttpGet("GetWishlistById/{wishlistId}")]
+        public async Task<IActionResult> GetWishlistById(int wishlistId)
+        {
+            try
+            {
+                if(wishlistId <= 0)
+                {
+                    return BadRequest(new ApiResponse<string>("Invalid wishlist ID.", 400));
+                }
+                var wishlist = await _wishlistRepository.GetWishlistByIdAsync(wishlistId);
+                return Ok(new ApiResponse<GetWishlistDto>(wishlist, "Wishlist By Id is retrieved successfully."));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>($"An error occurred while retrieving wishlist by Id: {ex.Message}", 500));
+            }
+        }
+
         [HttpPost("AddToWishlist")]
         public async Task<IActionResult> AddToWishlist([FromBody] AddWishlistDto wishlistDto)
         {
@@ -42,7 +60,7 @@ namespace Ingenious.Controllers
                 }
 
                 var wishlistId = await _wishlistRepository.AddToWishlistAsync(wishlistDto);
-                return CreatedAtAction(nameof(GetWishlistByUserId), new { wishlistId }, new ApiResponse<int>(wishlistId, "Product added to wishlist.", 201));
+                return CreatedAtAction(nameof(GetWishlistById), new { wishlistId }, new ApiResponse<int>(wishlistId, "Product added to wishlist.", 201));
             }
             catch (Exception ex)
             {
@@ -61,11 +79,6 @@ namespace Ingenious.Controllers
                 }
 
                 var result = await _wishlistRepository.RemoveFromWishlistAsync(wishlistId);
-                if (result <= 0)
-                {
-                    return NotFound(new ApiResponse<string>("Wishlist item not found.", 404));
-                }
-
                 return Ok(new ApiResponse<string>("Product removed from wishlist.", 200));
             }
             catch (Exception ex)

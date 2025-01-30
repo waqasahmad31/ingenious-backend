@@ -9,6 +9,7 @@ namespace Ingenious.Repositories
         Task<int> AddToWishlistAsync(AddWishlistDto dto);
         Task<int> RemoveFromWishlistAsync(int wishlistId);
         Task<List<GetWishlistDto>> GetWishlistByUserIdAsync(string aspNetUserId);
+        Task<GetWishlistDto> GetWishlistByIdAsync(int wishlistId);
     }
 
     public class WishlistRepository : IWishlistRepository
@@ -69,6 +70,27 @@ namespace Ingenious.Repositories
             }
 
             return getWishlistsDto;
+        }
+
+        public async Task<GetWishlistDto> GetWishlistByIdAsync(int wishlistId)
+        {
+            var parameters = new[]
+           {
+                new MySqlParameter("@p_WishlistId", wishlistId)
+            };
+
+            var wishlist = await DbHelper.Get<WishlistDto>("Wishlist_GetById", parameters, _connectionStrings);
+
+            GetWishlistDto wishlistDto = new GetWishlistDto()
+            {
+                WishlistId = wishlist.WishlistId,
+                AspNetUserId = wishlist.AspNetUserId,
+                ProductId = wishlist.ProductId,
+                CreatedAt = wishlist.CreatedAt,
+                Product = await _productRepository.GetProductByIdAsync(wishlist.ProductId)
+            };
+
+            return wishlistDto;
         }
     }
 }
