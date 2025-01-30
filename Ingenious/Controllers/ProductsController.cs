@@ -38,11 +38,19 @@ namespace Ingenious.Controllers
         }
 
         [HttpGet("GetAllProducts")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts(
+            int? productId = null,
+            int? categoryId = null,
+            string? name = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            int? minStock = null,
+            int? maxStock = null,
+            bool? isActive = true)
         {
             try
             {
-                var products = await _productRepository.GetAllProductsAsync();
+                var products = await _productRepository.GetAllProductsAsync(productId, categoryId, name, minPrice, maxPrice, minStock, maxStock, isActive);
                 if (products == null || !products.Any())
                     return NotFound(new ApiResponse<string>("No products found.", 404));
 

@@ -8,7 +8,7 @@ namespace Ingenious.Repositories
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<GetOrderDto>> GetOrdersAsync(int? orderId = null);
+        Task<IEnumerable<GetOrderDto>> GetOrdersAsync(int? orderId = null, string? aspNetUserId = null);
         Task<int> AddOrderAsync(AddOrderDto saleDto);
     }
 
@@ -97,11 +97,12 @@ namespace Ingenious.Repositories
             }
         }
 
-        public async Task<IEnumerable<GetOrderDto>> GetOrdersAsync(int? orderId = null)
+        public async Task<IEnumerable<GetOrderDto>> GetOrdersAsync(int? orderId = null, string? aspNetUserId = null)
         {
             var parameters = new MySqlParameter[]
             {
                 new MySqlParameter("@p_OrderId", orderId ?? (object)DBNull.Value),
+                new MySqlParameter("@p_AspNetUserId", aspNetUserId ?? (object)DBNull.Value),
             };
 
             var orders = await DbHelper.GetList<GetOrderDto>("Orders_GetOrders", parameters, _connectionStrings);

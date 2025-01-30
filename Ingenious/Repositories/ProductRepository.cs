@@ -8,7 +8,15 @@ namespace Ingenious.Repositories
 {
     public interface IProductRepository
     {
-        Task<IEnumerable<GetProductDto>> GetAllProductsAsync(int? productId = null);
+        Task<IEnumerable<GetProductDto>> GetAllProductsAsync(
+            int? productId = null,
+            int? categoryId = null,
+            string? name = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            int? minStock = null,
+            int? maxStock = null,
+            bool? isActive = true);
         Task<GetProductDto> GetProductByIdAsync(int productId);
         Task<bool> AddProductWithDetailsAsync(ProductCreateCombinedDto productDto);
         Task<int> AddProductAsync(CreateProductDto product);
@@ -32,11 +40,26 @@ namespace Ingenious.Repositories
             _connectionStrings = connectionStrings;
         }
 
-        public async Task<IEnumerable<GetProductDto>> GetAllProductsAsync(int? productId = null)
+        public async Task<IEnumerable<GetProductDto>> GetAllProductsAsync(
+            int? productId = null,
+            int? categoryId = null,
+            string? name = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            int? minStock = null,
+            int? maxStock = null,
+            bool? isActive = true)
         {
             var parameters = new[]
             {
-                new MySqlParameter("@p_productId", productId ?? (object)DBNull.Value)
+                new MySqlParameter("@p_productId", productId ?? (object)DBNull.Value),
+                new MySqlParameter("@p_categoryId", categoryId ?? (object)DBNull.Value),
+                new MySqlParameter("@p_name", name ?? (object)DBNull.Value),
+                new MySqlParameter("@p_minPrice", minPrice ?? (object)DBNull.Value),
+                new MySqlParameter("@p_maxPrice", maxPrice ?? (object)DBNull.Value),
+                new MySqlParameter("@p_minStock", minStock ?? (object)DBNull.Value),
+                new MySqlParameter("@p_maxStock", maxStock ?? (object)DBNull.Value),
+                new MySqlParameter("@p_isActive", isActive ?? (object)DBNull.Value),
             };
 
             var dataset = await DbHelper.GetDataSet("GetAllProducts", parameters, _connectionStrings);

@@ -19,11 +19,11 @@ namespace Ingenious.Controllers
         }
 
         [HttpGet("GetOrders")]
-        public async Task<IActionResult> GetOrders(int? orderId = null)
+        public async Task<IActionResult> GetOrders(int? orderId = null, string? aspNetUserId = null)
         {
             try
             {
-                var orders = await _orderRepository.GetOrdersAsync(orderId: orderId);
+                var orders = await _orderRepository.GetOrdersAsync(orderId: orderId, aspNetUserId: aspNetUserId);
                 return Ok(new ApiResponse<IEnumerable<GetOrderDto>>(orders, "Orders retrieved successfully."));
             }
             catch (Exception ex)

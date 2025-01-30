@@ -75,7 +75,7 @@ namespace Ingenious.Repositories
         public async Task<GetWishlistDto> GetWishlistByIdAsync(int wishlistId)
         {
             var parameters = new[]
-           {
+            {
                 new MySqlParameter("@p_WishlistId", wishlistId)
             };
 
