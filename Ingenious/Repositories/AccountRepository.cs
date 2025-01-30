@@ -31,6 +31,7 @@ namespace Ingenious.Repositories
         Task<AccessRequestResponseDto> RefreshAccessToken(AccessRequestResponseDto model);
         Task<IEnumerable<IdentityRole>> GetRoles();
         Task<IEnumerable<AspNetUsersDto>> GetAllAspNetUsers(int roleId, string userId);
+        Task<IEnumerable<AspNetUsersDto>> GetAllAspNetUsersByRole(string role);
         Task<List<AdminEmailDto>> GetAllEmails();
         Task<IList<ApplicationUser>> GetAllAdminIds();
         Task<bool> IsBlockUserAccountByIdAsync(string aspNetUserId, bool isBlocked);
@@ -44,6 +45,7 @@ namespace Ingenious.Repositories
         private readonly JWTModel _jwtSetting;
         private readonly IConfiguration _configuration;
         private readonly IEmailRepository _emailRepository;
+        private readonly IAddressRepository _addressRepository;
 
         public AccountRepository(
             ConnectionStrings connectionStrings,
@@ -65,38 +67,63 @@ namespace Ingenious.Repositories
 
         public async Task<ApplicationUser> RegisterUser(RegisterUserDto model)
         {
-            try
+            string connStr = await _connectionStrings.Get();
+
+            using (MySqlConnection con = new MySqlConnection(connStr))
             {
-                //await EnsureRolesExistAsync();
-                var user = new ApplicationUser
+                await con.OpenAsync();
+                using (MySqlTransaction transaction = await con.BeginTransactionAsync())
                 {
-                    UserName = model.Username,
-                    Email = model.Username,
-                    PhoneNumber = model.ContactNumber,
-                    FullName = model.FullName,
-                    isBlocked = model.isBlocked,
-                    IsDeleted = model.IsDeleted
-                };
-                var result = await _userManager.CreateAsync(user, model.Password);
+                    try
+                    {
+                        var user = new ApplicationUser
+                        {
+                            UserName = model.Username,
+                            Email = model.Username,
+                            PhoneNumber = model.ContactNumber,
+                            FullName = model.FullName,
+                            isBlocked = model.isBlocked,
+                            IsDeleted = model.IsDeleted
+                        };
 
-                if (!result.Succeeded)
-                {
-                    return null;
+                        var result = await _userManager.CreateAsync(user, model.Password);
+
+                        if (!result.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+
+                        var role = await _roleManager.FindByIdAsync(model.RoleId);
+                        var isAddedToRole = await _userManager.AddToRoleAsync(user, role.Name);
+
+                        if (!isAddedToRole.Succeeded)
+                        {
+                            await transaction.RollbackAsync();
+                            return null;
+                        }
+
+                        if (model.Address != null)
+                        {
+                            model.Address.AspNetUserId = user.Id;
+                            int addressId = await _addressRepository.AddAddressWithTransactionAsync(model.Address, transaction);
+
+                            if (addressId <= 0)
+                            {
+                                await transaction.RollbackAsync();
+                                return null;
+                            }
+                        }
+
+                        await transaction.CommitAsync();
+                        return user;
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error registering user: {ex.Message}", ex);
+                    }
                 }
-
-                var role = await _roleManager.FindByIdAsync(model.RoleId);
-                var isAddedToRole = await _userManager.AddToRoleAsync(user, role.Name);
-
-                if (!isAddedToRole.Succeeded)
-                {
-                    return null;
-                }
-
-                return user;
-            }
-            catch (Exception ex)
-            {
-                throw;
             }
         }
 
@@ -337,6 +364,17 @@ namespace Ingenious.Repositories
 
             return await DbHelper.GetList<AspNetUsersDto>("sp_get_All_users", parameters, _connectionStrings);
         }
+
+        public async Task<IEnumerable<AspNetUsersDto>> GetAllAspNetUsersByRole(string role)
+        {
+            var parameters = new MySqlParameter[]
+            {
+                new MySqlParameter("@p_Role", role)
+            };
+
+            return await DbHelper.GetList<AspNetUsersDto>("GetAllUsersByRole", parameters, _connectionStrings);
+        }
+
         public async Task<List<AdminEmailDto>> GetAllEmails()
         {
             var parameters = new MySqlParameter[] { };

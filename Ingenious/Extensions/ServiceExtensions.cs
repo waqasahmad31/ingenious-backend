@@ -10,7 +10,9 @@ namespace Ingenious.Extensions
             services.AddScoped<ConnectionStrings>();
             services.AddScoped<DbHelper>();
 
-            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>(); 
+            services.AddScoped<IAddressRepository, AddressRepository>();
+
             services.AddScoped<IEmailRepository, EmailRepository>();
 
             services.AddScoped<ICategoryRepository, CategoryRepository>();

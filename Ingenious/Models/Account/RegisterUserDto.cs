@@ -11,5 +11,7 @@ namespace Ingenious.Models.Account
         public string Password { get; set; }
         public bool isBlocked { get; set; }
         public bool IsDeleted { get; set; }
+
+        public AddAddressDto Address { get; set; }
     }
 }

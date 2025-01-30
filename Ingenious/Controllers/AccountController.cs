@@ -124,54 +124,54 @@ namespace Ingenious.Controllers.Shared
             return Ok(new ApiResponse<object>(roles, "Roles fetched successfully!", 200));
         }
 
-        [HttpGet]
-        [Route("GetUsersById_Role")]
-        public async Task<object> GetUsersById_Role(string userId, int roleId)
-        {
-            try
-            {
-                string roleName = roleId == 1 ? "Admin" :
-                   roleId == 2 ? "Doctor" :
-                   roleId == 3 ? "Pharmacist" : "LabAssistant";
+        //[HttpGet]
+        //[Route("GetUsersById_Role")]
+        //public async Task<object> GetUsersById_Role(string userId, int roleId)
+        //{
+        //    try
+        //    {
+        //        string roleName = roleId == 1 ? "Admin" :
+        //           roleId == 2 ? "Doctor" :
+        //           roleId == 3 ? "Pharmacist" : "LabAssistant";
 
-                GetAllAspNetUsersDto aspNetUsers = new GetAllAspNetUsersDto();
+        //        GetAllAspNetUsersDto aspNetUsers = new GetAllAspNetUsersDto();
 
-                AspNetUsersDto user = new AspNetUsersDto();
+        //        AspNetUsersDto user = new AspNetUsersDto();
 
-                var results = await _accountRepository.GetAllAspNetUsers(roleId, userId);
+        //        var results = await _accountRepository.GetAllAspNetUsers(roleId, userId);
 
-                aspNetUsers = new GetAllAspNetUsersDto()
-                {
-                    RoleId = roleId,
-                    Name = roleName,
-                    Users = results.ToList()
+        //        aspNetUsers = new GetAllAspNetUsersDto()
+        //        {
+        //            RoleId = roleId,
+        //            Name = roleName,
+        //            Users = results.ToList()
 
-                };
-                return Ok(new ApiResponse<GetAllAspNetUsersDto>(aspNetUsers, "User fetched successfully", 200));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<string>("An error occurred while fetching a user: " + ex.Message, 500));
-            }
-        }
+        //        };
+        //        return Ok(new ApiResponse<GetAllAspNetUsersDto>(aspNetUsers, "User fetched successfully", 200));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new ApiResponse<string>("An error occurred while fetching a user: " + ex.Message, 500));
+        //    }
+        //}
 
-        [HttpGet]
-        [Route("GetAllAdminIds")]
-        public async Task<IActionResult> GetAllAdminIds()
-        {
-            try
-            {
-                var adminUsers = await _accountRepository.GetAllAdminIds();
+        //[HttpGet]
+        //[Route("GetAllAdminIds")]
+        //public async Task<IActionResult> GetAllAdminIds()
+        //{
+        //    try
+        //    {
+        //        var adminUsers = await _accountRepository.GetAllAdminIds();
 
-                var adminIds = adminUsers.Select(user => user.Id).ToList();
+        //        var adminIds = adminUsers.Select(user => user.Id).ToList();
 
-                return Ok(new ApiResponse<List<string>>(adminIds, "AdminIds are fetched successfully.", 200));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<string>("An error occurred while fetching AdminIds: " + ex.Message, 500));
-            }
-        }
+        //        return Ok(new ApiResponse<List<string>>(adminIds, "AdminIds are fetched successfully.", 200));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new ApiResponse<string>("An error occurred while fetching AdminIds: " + ex.Message, 500));
+        //    }
+        //}
 
         [HttpPost("block-user/{aspNetUserId}")]
         public async Task<IActionResult> IsBlockUserAccountByIdAsync(string aspNetUserId, bool isBlocked)
@@ -187,6 +187,23 @@ namespace Ingenious.Controllers.Shared
             catch (Exception ex)
             {
                 return StatusCode(500, new ApiResponse<string>($"An error occurred while blocking the user: {ex.Message}", 500));
+            }
+        }
+
+        [HttpGet]
+        [Route("GetUsersByRole")]
+        public async Task<object> GetUsersById_Role(string role)
+        {
+            try
+            {
+                GetAllAspNetUsersDto aspNetUsers = new GetAllAspNetUsersDto();
+
+                IEnumerable<AspNetUsersDto> users = await _accountRepository.GetAllAspNetUsersByRole(role);
+                return Ok(new ApiResponse<IEnumerable<AspNetUsersDto>>(users, "User fetched successfully", 200));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>("An error occurred while fetching a user: " + ex.Message, 500));
             }
         }
     }
