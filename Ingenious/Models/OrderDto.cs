@@ -8,10 +8,10 @@ namespace Ingenious.Models
         public int OrderId { get; set; }
         public string AspNetUserId { get; set; }
         public decimal TotalAmount { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public OrderStatusEnum OrderStatus { get; set; } //ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled')
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public PaymentStatusEnum PaymentStatus { get; set; } //ENUM('Pending', 'Paid', 'Failed', 'Refunded')
+
+        public string OrderStatus { get; set; } //ENUM('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled')
+
+        public string PaymentStatus { get; set; } //ENUM('Pending', 'Paid', 'Failed', 'Refunded')
         public int ShippingAddressId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

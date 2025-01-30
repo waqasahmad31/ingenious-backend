@@ -60,7 +60,7 @@ namespace DAS.DataAccess.Helpers
             }
         }
 
-        public static async Task<int> ExecuteQuery(string procedureName, MySqlParameter[] parameters, ConnectionStrings connectionStrings, MySqlTransaction transaction)
+        public static async Task<int> ExecuteWithTransaction(string procedureName, MySqlParameter[] parameters, ConnectionStrings connectionStrings, MySqlTransaction transaction)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace DAS.DataAccess.Helpers
                         cmd.Transaction = transaction;
 
                         await con.OpenAsync();
-                        return await cmd.ExecuteNonQueryAsync();
+                        return Convert.ToInt32(await cmd.ExecuteScalarAsync());
                     }
                 }
             }
@@ -226,33 +226,20 @@ namespace DAS.DataAccess.Helpers
 
                 foreach (DataColumn column in row.Table.Columns)
                 {
-                    // Find the property on T that matches column name (case-insensitive)
-                    PropertyInfo? property = typeof(T).GetProperty(
-                        column.ColumnName,
-                        BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance
-                    );
+                    PropertyInfo? property = typeof(T).GetProperty(column.ColumnName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
                     if (property != null && row[column] != DBNull.Value)
                     {
                         Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-
-                        // 1) If it's an enum, parse the string
-                        if (propertyType.IsEnum)
-                        {
-                            // e.g. "Pending" => OrderStatusEnum.Pending
-                            var stringValue = row[column].ToString();
-                            if (!string.IsNullOrEmpty(stringValue))
-                            {
-                                var enumValue = Enum.Parse(propertyType, stringValue);
-                                property.SetValue(item, enumValue, null);
-                            }
-                        }
-                        else
-                        {
-                            // 2) Otherwise do the normal Convert.ChangeType
-                            object? safeValue = Convert.ChangeType(row[column], propertyType);
-                            property.SetValue(item, safeValue, null);
-                        }
+                        //if (propertyType == typeof(TimeSpan))
+                        //{
+                        //property.SetValue(item, TimeSpan.Parse(row[column].ToString()));
+                        //}
+                        //else
+                        //{
+                        object? safeValue = Convert.ChangeType(row[column], propertyType);
+                        property.SetValue(item, safeValue, null);
+                        //}
                     }
                 }
 
@@ -260,12 +247,8 @@ namespace DAS.DataAccess.Helpers
             }
             catch (Exception ex)
             {
-                throw new Exception(
-                    $"Error creating item of type '{typeof(T).Name}' from DataRow. Details: {ex.Message}",
-                    ex
-                );
+                throw new Exception($"Error creating item of type '{typeof(T).Name}' from DataRow. Details: {ex.Message}", ex);
             }
         }
-
     }
 }
