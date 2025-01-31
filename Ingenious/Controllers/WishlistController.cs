@@ -36,7 +36,7 @@ namespace Ingenious.Controllers
         {
             try
             {
-                if(wishlistId <= 0)
+                if (wishlistId <= 0)
                 {
                     return BadRequest(new ApiResponse<string>("Invalid wishlist ID.", 400));
                 }
@@ -60,7 +60,15 @@ namespace Ingenious.Controllers
                 }
 
                 var wishlistId = await _wishlistRepository.AddToWishlistAsync(wishlistDto);
-                return CreatedAtAction(nameof(GetWishlistById), new { wishlistId }, new ApiResponse<int>(wishlistId, "Product added to wishlist.", 201));
+                var wishlistData = await _wishlistRepository.GetWishlistByIdAsync(wishlistId);
+                if (wishlistData != null)
+                {
+                    return Ok(new ApiResponse<GetWishlistDto>(wishlistData, "Product added to wishlist.", 200));
+                }
+                else
+                {
+                    return Ok(new ApiResponse<string>("Product removed from wishlist.", 200));
+                }
             }
             catch (Exception ex)
             {

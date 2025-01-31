@@ -81,16 +81,24 @@ namespace Ingenious.Repositories
 
             var wishlist = await DbHelper.Get<WishlistDto>("Wishlist_GetById", parameters, _connectionStrings);
 
-            GetWishlistDto wishlistDto = new GetWishlistDto()
+            if (wishlist != null)
             {
-                WishlistId = wishlist.WishlistId,
-                AspNetUserId = wishlist.AspNetUserId,
-                ProductId = wishlist.ProductId,
-                CreatedAt = wishlist.CreatedAt,
-                Product = await _productRepository.GetProductByIdAsync(wishlist.ProductId)
-            };
 
-            return wishlistDto;
+                GetWishlistDto wishlistDto = new GetWishlistDto()
+                {
+                    WishlistId = wishlist.WishlistId,
+                    AspNetUserId = wishlist.AspNetUserId,
+                    ProductId = wishlist.ProductId,
+                    CreatedAt = wishlist.CreatedAt,
+                    Product = await _productRepository.GetProductByIdAsync(wishlist.ProductId)
+                };
+
+                return wishlistDto;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }
