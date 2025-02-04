@@ -54,7 +54,8 @@ namespace Ingenious.Repositories
             IOptions<JWTModel> jwtSetting,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
-            IEmailRepository emailRepository)
+            IEmailRepository emailRepository,
+            IAddressRepository addressRepository)
         {
             _connectionStrings = connectionStrings;
             _userManager = userManager;
@@ -63,6 +64,7 @@ namespace Ingenious.Repositories
             _roleManager = roleManager;
             _configuration = configuration;
             _emailRepository = emailRepository;
+            _addressRepository = addressRepository;
         }
 
         public async Task<ApplicationUser> RegisterUser(RegisterUserDto model)
