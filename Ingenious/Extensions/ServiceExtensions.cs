@@ -7,6 +7,9 @@ namespace Ingenious.Extensions
     {
         public static void ConfigureScopedServices(this IServiceCollection services)
         {
+             // Add MemoryCache services
+            services.AddMemoryCache();
+
             services.AddScoped<ConnectionStrings>();
 
             services.AddScoped<DbHelper>();

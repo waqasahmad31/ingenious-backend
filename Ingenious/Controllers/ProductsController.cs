@@ -18,25 +18,6 @@ namespace Ingenious.Controllers
             _productRepository = productRepository;
         }
 
-
-        [HttpPost("AddCompleteProduct")]
-        public async Task<IActionResult> AddCompleteProduct([FromBody] ProductCreateCombinedDto productDto)
-        {
-            try
-            {
-                var result = await _productRepository.AddProductWithDetailsAsync(productDto);
-                if (result)
-                {
-                    return Ok(new ApiResponse<bool>(result, "Product created successfully."));
-                }
-                return BadRequest(new ApiResponse<bool>(result, "Product not created.", 400));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse<string>($"An error occurred while adding the product: {ex.Message}", 500));
-            }
-        }
-
         [HttpGet("GetAllProducts")]
         public async Task<IActionResult> GetAllProducts(
             int? productId = null,
@@ -76,6 +57,43 @@ namespace Ingenious.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new ApiResponse<string>($"An error occurred: {ex.Message}", 500));
+            }
+        }
+
+        [HttpPost("AddCompleteProduct")]
+        public async Task<IActionResult> AddCompleteProduct([FromBody] ProductCreateCombinedDto productDto)
+        {
+            try
+            {
+                var result = await _productRepository.AddProductWithDetailsAsync(productDto);
+                //if (result)
+                //{
+                return Ok(new ApiResponse<bool>(result, "Product created successfully."));
+                //}
+                //return BadRequest(new ApiResponse<bool>(result, "Product not created.", 400));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>($"An error occurred while adding the product: {ex.Message}", 500));
+            }
+        }
+
+        [HttpPut("UpdateCompleteProduct/{productId}")]
+        public async Task<IActionResult> UpdateCompleteProduct(int productId, [FromBody] ProductCreateCombinedDto productDto)
+        {
+            try
+            {
+                var result = await _productRepository.UpdateProductWithDetailsAsync(productId, productDto);
+
+                //if (result)
+                //{
+                return Ok(new ApiResponse<bool>(result, "Product updated successfully."));
+                //}
+                //return BadRequest(new ApiResponse<bool>(result, "Product not updated.", 400));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<string>($"An error occurred while updating the product: {ex.Message}", 500));
             }
         }
 
