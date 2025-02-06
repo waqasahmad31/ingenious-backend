@@ -51,7 +51,7 @@ namespace Ingenious.Repositories
                 new MySqlParameter("@p_IsDefault", dto.IsDefault)
             };
 
-            return await DbHelper.ExecuteWithTransaction("Addresses_Add", parameters, _connectionStrings, transaction);
+            return await DbHelper.ExecuteWithTransaction("Addresses_AddAddress", parameters, _connectionStrings, transaction);
         }
 
 
